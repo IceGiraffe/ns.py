@@ -66,11 +66,12 @@ class PacketSink:
             rec_index = packet.flow_id
         else:
             rec_index = packet.src
-
+        
         if self.rec_waits:
             self.waits[rec_index].append(self.env.now - packet.time)
             self.packet_sizes[rec_index].append(packet.size)
             self.packet_times[rec_index].append(packet.time)
+            packet.perhop_time['sink'] = now
             self.perhop_times[rec_index].append(packet.perhop_time)
 
         if self.rec_arrivals:

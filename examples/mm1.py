@@ -27,7 +27,7 @@ from ns.packet.sink import PacketSink
 from ns.port.monitor import PortMonitor
 from ns.port.port import Port
 
-arrival_dist = partial(random.expovariate, 0.5)
+arrival_dist = partial(random.expovariate, 0.5) # a mean interval of 2 seconds
 size_dist = partial(random.expovariate, 0.01)  # a mean size of 100 bytes
 samp_dist = partial(random.expovariate, 1.0)
 port_rate = 1000.0

@@ -8,8 +8,9 @@ import simpy
 from ns.packet.dist_generator import DistPacketGenerator
 from ns.packet.sink import PacketSink
 from ns.scheduler.sp import SPServer
+import sys
 
-
+print(sys.path)
 def arrival_1():
     """ Packets arrive with a constant interval of 1.5 seconds. """
     return 1.5

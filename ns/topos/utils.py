@@ -16,6 +16,9 @@ def generate_flows(G, hosts, nflows):
     all_flows = dict()
     for flow_id in range(nflows):
         src, dst = sample(hosts, 2)
+        # print("Generating flows")
+        # print(src)
+        # print(dst)
         all_flows[flow_id] = Flow(flow_id, src, dst)
         all_flows[flow_id].path = sample(
             list(nx.all_simple_paths(G, src, dst, cutoff=nx.diameter(G))),

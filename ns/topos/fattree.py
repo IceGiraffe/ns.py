@@ -52,6 +52,7 @@ def build(k):
 
     # Create core nodes
     n_core = (k // 2)**2
+    print("n_core {}".format(n_core))
     topo.add_nodes_from([v for v in range(int(n_core))],
                         layer='core',
                         type='switch')

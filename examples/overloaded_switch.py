@@ -31,7 +31,7 @@ def packet_size():
 env = simpy.Environment()
 ps = PacketSink(env, debug=True)
 pg = DistPacketGenerator(env, "pg", packet_arrival, packet_size, flow_id=0)
-port = Port(env, rate=200.0, qlimit=300)
+port = Port(env, rate=100.0, qlimit=300, debug=True)
 
 pg.out = port
 port.out = ps

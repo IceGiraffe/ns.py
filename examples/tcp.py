@@ -53,11 +53,14 @@ switch = SimplePacketSwitch(
     buffer_size=5,  # in packets
     debug=True)
 
+# TCPSink Flow ID + 10000
 receiver = TCPSink(env, rec_waits=True, debug=True)
 
 sender.out = wire1_downstream
 wire1_downstream.out = switch
+
 wire2_downstream.out = receiver
+
 receiver.out = wire2_upstream
 wire2_upstream.out = switch
 

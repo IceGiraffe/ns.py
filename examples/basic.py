@@ -11,7 +11,11 @@ from ns.packet.dist_generator import DistPacketGenerator
 from ns.packet.sink import PacketSink
 from ns.port.wire import Wire
 
+import sys
 
+# sys.stdout = open("log.txt", 'a')
+
+# 不同的分布，其实就是一个返回包间隔的函数
 def arrival_1():
     """ Packets arrive with a constant interval of 1.5 seconds. """
     return 1.5
