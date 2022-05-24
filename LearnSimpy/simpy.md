@@ -10,6 +10,9 @@
 
 * `Environment`存储`Event`，记录当前的模拟时间`Simulation Time`，随着时间不断前进，`Event`会不断触发`Trigger`，之后会调用回调函数列表中的函数，注意，`Process`一定在该函数中，这样就可以通过`process`循环生成`Event`，`Event`的返回值也会传入到`Process`中。
 
+* `abcd`
+* abcd
+
 * 下面的例子详细说明了上述过程
 
   ~~~Python
@@ -46,18 +49,18 @@
 
     * 当多次调用`env.run()`时，将在模拟环境上次停下的时间继续，下方代码模拟了一个进度条，`until`参数的值不能小于当前的模拟时间。
 
-      ```python
+      ~~~ python
       for i in range(100):
           env.run(until=i)
           progressbar.update(i)
-      ```
+      ~~~
 
     * 特定事件被触发
 
-      ```python
+      ~~~python
       env.run(until=env.timeout(5)) # 等价于env.run(until=5)
       env.run(until=env.process(my_proc(env))) #当该process执行时，仿真结束
-      ```
+      ~~~
 
 * `SimPy`支持单步仿真
 
@@ -108,7 +111,7 @@
 
 # Events
 
-## Basics
+## Event Basics
 
 * 基于`Event`派生出不同的`Event`
 
@@ -362,7 +365,7 @@
   * [Containers](https://simpy.readthedocs.io/en/latest/topical_guides/resources.html#res-type-container) – Resources that model the production and consumption（**生产者-消费者问题**） of a homogeneous, undifferentiated bulk. It may either be continuous (like water) or discrete (like apples).
   * [Stores](https://simpy.readthedocs.io/en/latest/topical_guides/resources.html#res-type-store) – Resources that allow the production and consumption of Python objects.
 
-## Basics
+## Resource Basics
 
 * 资源类似某种容器，一般容量是优先的。`Process`可以从`esource`中`Put`或`Get`某种东西，如果`Resource`满了或者空了，则`Process`需要排队
 
@@ -501,9 +504,9 @@
   # 2 got resource at 5
   ~~~
 
-  	* 抢占式资源池继承自优先级资源池，在`Request`时手动指定`preempt=False`，可主动选择不抢占，如果所有进程都这样做，抢占式资源池的行为最终和优先级资源池一致；
-  	* 优先级比抢占的优先级更高，如果前方有一个优先级更高的`Process`选择排队而不抢占，后面任何优先级更低的`Process`都无法抢占；
-  	* 优先级的值越小，优先级越高。
+  * 抢占式资源池继承自优先级资源池，在`Request`时手动指定`preempt=False`，可主动选择不抢占，如果所有进程都这样做，抢占式资源池的行为最终和优先级资源池一致；
+  * 优先级比抢占的优先级更高，如果前方有一个优先级更高的`Process`选择排队而不抢占，后面任何优先级更低的`Process`都无法抢占；
+  * 优先级的值越小，优先级越高。
 
 ## Containers
 
@@ -544,7 +547,7 @@
 
 * 内置的`Resource`类无法直接访问，但是可以通过`Monkey-Patching`的方法来间接改变内置方法的行为
 
-## Event tracing 
+## Event tracing
 
 ~~~python
 from functools import partial, wraps
