@@ -1,5 +1,6 @@
 from functools import partial
 from random import expovariate, sample
+from tkinter.tix import Tree
 
 import numpy as np
 import simpy
@@ -15,22 +16,23 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 from pprint import pprint
+from ZipfPacketGenerator import ZipfPacketGenerator
 
 env = simpy.Environment()
 
 n_flows = 100
 k = 4
-pir = 100000
+pir = 100000    # port rate
 buffer_size = 1000
-mean_pkt_size = 100.0
+mean_pkt_size = 100.0   # 平均包大小100，认为是指数分布
 
-ft = build_fattree(k)
-nx.draw(ft, with_labels = ft.nodes)
+ft = build_fattree(k)   # 构建fat tree topology
+# nx.draw(ft, with_labels = ft.nodes) # nx draw 一下
 # plt.show()
 
 pprint("Fat Tree({}) with {} nodes.".format(k, ft.number_of_nodes()))
 
-hosts = set()
+hosts = set()   # 找到所有服务器，fat tree的流量都是从一台服务器到另一台服务器的
 for n in ft.nodes():
     if ft.nodes[n]['type'] == 'host':
         hosts.add(n)
@@ -42,21 +44,34 @@ pprint("All Hosts {}".format(hosts))
 all_flows = generate_flows(ft, hosts, n_flows)
 pprint(all_flows)
 
-
+# size distribution: expovariate distribution 
+# with lambda = 1.0 / mean_pkt_size, which means E(size) = mean_pkt_size
 size_dist = partial(expovariate, 1.0 / mean_pkt_size)
 
-for fid in all_flows:
-    arr_dist = partial(expovariate, 1 + np.random.rand())
+true_flow_size = dict()
 
-    pg = DistPacketGenerator(env,
+for fid in all_flows:
+    arr_dist = partial(expovariate, 1 + np.random.rand())   #设置流量的包间隔
+
+    pg = ZipfPacketGenerator(env,
                              f"Flow_{fid}",
                              arr_dist,
                              size_dist,
-                             flow_id=fid)
+                             flow_id=fid,
+                             alpha=1.5)
+
+    true_flow_size[fid] = pg.flow_size
+
     ps = PacketSink(env)
 
     all_flows[fid].pkt_gen = pg
     all_flows[fid].pkt_sink = ps
+
+print(sorted(true_flow_size.items(), key = lambda x: x[1], reverse=True))
+
+max_flow_id = max(true_flow_size.values())
+
+print(f'The size of biggest flow is {max_flow_id}')
 
 ft = generate_fib(ft, all_flows)
 
@@ -67,7 +82,7 @@ weights = {c: 1 for c in range(n_classes_per_port)}
 def flow_to_classes(f_id, n_id=0, fib=None):
     return (f_id + n_id + fib[f_id]) % n_classes_per_port
 
-
+# 遍历fat tree的每个节点
 for node_id in ft.nodes():
     # 为每个node增加网卡
     node = ft.nodes[node_id]
@@ -90,9 +105,11 @@ for node_id in ft.nodes():
                                       weights,
                                       'DRR',
                                       flow_classes,
-                                      element_id=f"{node_id}")
+                                      element_id=f"Switch_{node_id}")
     # pprint(f'{node_id}')
+    # 下一跳
     node['device'].demux.fib = node['flow_to_port']
+
 
 # 连接交换机出端口
 for n in ft.nodes():
@@ -105,7 +122,12 @@ for flow_id, flow in all_flows.items():
     flow.pkt_gen.out = ft.nodes[flow.src]['device']
     ft.nodes[flow.dst]['device'].demux.ends[flow_id] = flow.pkt_sink
 
-env.run(until=2)
+env.run()
+
+for flow_id in all_flows:
+    f = all_flows[flow_id]
+    print(f'Flow {flow_id}: flow_size = {f.pkt_gen.flow_size} and packets_sent = {f.pkt_gen.packets_sent}')
+
 
 for flow_id in sample(all_flows.keys(), 1):
     flow_id = 26
