@@ -17,6 +17,8 @@ import networkx as nx
 
 from pprint import pprint
 from ZipfPacketGenerator import ZipfPacketGenerator
+from MonitorSwitch import MonitorSwitchDHT
+from GlobalController import GlobalController
 
 env = simpy.Environment()
 
@@ -98,7 +100,15 @@ for node_id in ft.nodes():
     # 'DRR'
     # flow_classes: a function mapping flow id to class id
     # element_id = node_id
-    node['device'] = FairPacketSwitch(env,
+    # node['device'] = FairPacketSwitch(env,
+    #                                   k,
+    #                                   pir,
+    #                                   buffer_size,
+    #                                   weights,
+    #                                   'DRR',
+    #                                   flow_classes,
+    #                                   element_id=f"Switch_{node_id}")
+    node['device'] = MonitorSwitchDHT(env,
                                       k,
                                       pir,
                                       buffer_size,
@@ -122,15 +132,26 @@ for flow_id, flow in all_flows.items():
     flow.pkt_gen.out = ft.nodes[flow.src]['device']
     ft.nodes[flow.dst]['device'].demux.ends[flow_id] = flow.pkt_sink
 
-env.run()
+_ = GlobalController(env, 500, finish=50000, topo=ft)
+
+env.run(until=1000)
+
+print(env.now)
 
 for flow_id in all_flows:
     f = all_flows[flow_id]
     print(f'Flow {flow_id}: flow_size = {f.pkt_gen.flow_size} and packets_sent = {f.pkt_gen.packets_sent}')
 
 
-for flow_id in sample(all_flows.keys(), 1):
+for flow_id in sample(list(all_flows.keys()), 1):
     flow_id = 26
+    path = all_flows[flow_id].path
+    pprint(path)
+    for hop in path:
+        switch_name = ft.nodes[hop]['device'].element_id
+        res = ft.nodes[hop]['device'].query(flow_id)
+        print(f'Query at switch {switch_name}: result = {res}')
+        
     pprint(f"Flow {flow_id}")
     pprint("Packets Wait")
     pprint(all_flows[flow_id].pkt_sink.waits)
