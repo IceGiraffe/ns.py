@@ -38,6 +38,7 @@ class SimplePacketSwitch:
                  debug: bool = False) -> None:
         self.env = env
         self.ports = []
+        self.element_id = element_id
         for port in range(nports):
             self.ports.append(
                 Port(env,
@@ -97,6 +98,7 @@ class FairPacketSwitch:
         self.env = env
         self.ports = []
         self.egress_ports = []
+        self.element_id = f'Fair Switch {element_id}'
 
         for port in range(nports):
             egress_port = Port(env,
