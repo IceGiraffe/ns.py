@@ -1,4 +1,5 @@
 from xdrlib import Packer
+from xml.etree.ElementTree import ElementTree
 from ns.switch.switch import FairPacketSwitch
 from CMSketch import CountMinSketch
 from collections.abc import Callable
@@ -23,7 +24,8 @@ class MonitorSwitchDHT(FairPacketSwitch):
                         flow_classes, 
                         element_id, 
                         debug)
-        self.SKETCH = CountMinSketch(1000, 3)
+        self.element_id = element_id
+        self.SKETCH = CountMinSketch(50, 3)
     
     def put(self, packet):
         # 测量
